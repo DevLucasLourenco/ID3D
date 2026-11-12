@@ -1,0 +1,35 @@
+{
+  "name": "id3d",
+  "version": "0.1.0",
+  "description": "Visualizador de PDF 3D (PRC) no navegador: decodifica o modelo localmente e renderiza com WebGL.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/dev.mjs",
+    "sample": "node scripts/make-sample.mjs",
+    "test": "node --test \"test/*.test.js\"",
+    "lint": "eslint .",
+    "check": "npm run lint && npm test && npm run build"
+  },
+  "keywords": [
+    "pdf3d",
+    "prc",
+    "3d-pdf",
+    "webgl",
+    "threejs",
+    "viewer"
+  ],
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0"
+  }
+}
