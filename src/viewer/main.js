@@ -665,7 +665,7 @@ import { load, normalMismatch, creaseNormals } from '../core/index.js';
     try { sc = load(u8); }
     catch (e) { if (window.console) console.error(e); showError(String(e && e.message || e)); return false; }
     try { buildModel(sc, name); }
-    catch (e2) { if (window.console) console.error(e2); showError('Falha ao montar a cena: ' + String(e2 && e2.message || e2)); return false; }
+    catch (e2) { if (window.console) console.error(e2); showError('O modelo foi lido, mas não foi possível exibi-lo neste navegador.'); return false; }
     updateHint();
     return true;
   }

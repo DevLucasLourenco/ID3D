@@ -19,7 +19,7 @@ SectionReader.prototype = {
   },
   userData: function () {
     var n = this.r.uint();
-    if (n > this.r.end - this.r.p) throw new Error('PRC: user data inválido');
+    if (n > this.r.end - this.r.p) throw new Error('PRC: dados de usuário inválidos');
     this.r.p += n;
   },
   attributeEntry: function () {
@@ -145,7 +145,7 @@ SectionReader.prototype = {
   },
   markups: function () {
     var r = this.r;
-    if (r.uint() || r.uint() || r.uint() || r.uint()) throw new Error('PRC: markups/anotações ainda não suportados');
+    if (r.uint() || r.uint() || r.uint() || r.uint()) throw new Error('PRC: anotações 3D ainda não suportadas');
   },
   partDefinition: function () {
     var r = this.r, o = { type: T.ASM_PartDefinition };
@@ -155,7 +155,7 @@ SectionReader.prototype = {
     var n = r.uint(); o.items = [];
     for (var i = 0; i < n; i++) o.items.push(this.representationItem());
     this.markups();
-    if (r.uint()) throw new Error('PRC: vistas em PartDefinition não suportadas');
+    if (r.uint()) throw new Error('PRC: vistas em definições de peça não suportadas');
     this.userData();
     return o;
   },
@@ -176,9 +176,9 @@ SectionReader.prototype = {
     o.loadStatus = r.int();
     if (r.bit()) o.matrix = this.transformation3d();
     n = r.uint();
-    if (n) throw new Error('PRC: referências em ProductOccurrence não suportadas');
+    if (n) throw new Error('PRC: referências em ocorrências de produto não suportadas');
     this.markups();
-    if (r.uint()) throw new Error('PRC: vistas em ProductOccurrence não suportadas');
+    if (r.uint()) throw new Error('PRC: vistas em ocorrências de produto não suportadas');
     if (r.bit()) throw new Error('PRC: filtro de entidades não suportado');
     if (r.uint()) throw new Error('PRC: filtros de exibição não suportados');
     if (r.uint()) throw new Error('PRC: parâmetros de cena não suportados');
@@ -188,7 +188,7 @@ SectionReader.prototype = {
   // ------------------------------------------------------------ globais
   globals: function () {
     var r = this.r, g = {}, i, n;
-    if (r.uint()) throw new Error('PRC: schemas não suportados');
+    if (r.uint()) throw new Error('PRC: esquemas não suportados');
     this.expect(T.ASM_FileStructureGlobals, 'FileStructureGlobals');
     this.base(T.ASM_FileStructureGlobals, g);
     n = r.uint(); g.referenced = [];
@@ -356,7 +356,7 @@ SectionReader.prototype = {
   },
   modelFile: function () {
     var r = this.r, m = {};
-    if (r.uint()) throw new Error('PRC: schemas não suportados');
+    if (r.uint()) throw new Error('PRC: esquemas não suportados');
     this.expect(T.ASM_ModelFile, 'ModelFile');
     this.base(T.ASM_ModelFile, m);
     m.unitFromCAD = !!r.bit(); m.unit = r.double();
@@ -371,14 +371,17 @@ SectionReader.prototype = {
 function u32(d, p) { return (d[p] | (d[p + 1] << 8) | (d[p + 2] << 16) | (d[p + 3] << 24)) >>> 0; }
 
 export function parsePRC(d) {
-  if (d[0] !== 0x50 || d[1] !== 0x52 || d[2] !== 0x43) throw new Error('não e um stream PRC');
+  if (d[0] !== 0x50 || d[1] !== 0x52 || d[2] !== 0x43) throw new Error('os dados não são um modelo PRC');
   var p = 3, i, j;
   var version = u32(d, p); p += 8 + 32;
   var nfs = u32(d, p); p += 4;
+  // cada file structure ocupa pelo menos 48 bytes no cabecalho
+  if (nfs < 1 || p + nfs * 48 + 8 > d.length) throw new Error('PRC: cabeçalho inválido ou arquivo truncado');
   var infos = [];
   for (i = 0; i < nfs; i++) {
     var uuid = [u32(d, p), u32(d, p + 4), u32(d, p + 8), u32(d, p + 12)]; p += 20;
     var no = u32(d, p); p += 4;
+    if (no < 5 || p + no * 4 + 8 > d.length) throw new Error('PRC: cabeçalho inválido ou arquivo truncado');
     var offs = [];
     for (j = 0; j < no; j++, p += 4) offs.push(u32(d, p));
     infos.push({ uuid: uuid, offsets: offs });
