@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ID3D – Visualizador de PDF 3D</title>
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="bar">
+    <button id="btnSide" class="icon" title="Mostrar/ocultar estrutura" aria-label="Mostrar/ocultar estrutura">&#9776;</button>
+    <div class="brand">
+      <div id="docTitle">ID3D</div>
+      <div id="docSub">Visualizador de PDF 3D</div>
+    </div>
+    <div class="tools">
+      <button id="btnOpen" title="Abrir outro PDF 3D (ou arraste o arquivo para a janela)">Abrir PDF&hellip;</button>
+      <span class="sep"></span>
+      <label class="field"><span>Vista</span><select id="selView"></select></label>
+      <button id="btnFit" title="Enquadrar o modelo ou a sele&ccedil;&atilde;o (F)">Enquadrar</button>
+      <div class="seg" id="segProj" role="group" aria-label="Proje&ccedil;&atilde;o">
+        <button data-v="persp" class="on">Perspectiva</button><button data-v="ortho">Ortogr&aacute;fica</button>
+      </div>
+      <span class="sep"></span>
+      <label class="field"><span>Exibi&ccedil;&atilde;o</span>
+        <select id="selMode">
+          <option value="solid">S&oacute;lido</option>
+          <option value="edges">S&oacute;lido + arestas</option>
+          <option value="xray">Transparente</option>
+          <option value="wire">Aramado</option>
+        </select>
+      </label>
+      <button id="btnSection" class="toggle" title="Plano de corte">Corte</button>
+      <button id="btnMeasure" class="toggle" title="Medir dist&acirc;ncia entre dois pontos (M)">Medir</button>
+      <span class="sep"></span>
+      <button id="btnTheme" class="icon" title="Alternar tema claro/escuro" aria-label="Alternar tema">&#9680;</button>
+    </div>
+  </header>
+
+  <aside id="side">
+    <div class="sideHead">
+      <input id="search" type="search" placeholder="Buscar componente&hellip;" autocomplete="off" spellcheck="false">
+    </div>
+    <div id="tree" class="scroll"></div>
+    <div id="results" class="scroll" hidden></div>
+    <div class="sideFoot">
+      <button id="btnShowAll">Mostrar tudo</button>
+      <span id="stats"></span>
+    </div>
+  </aside>
+
+  <main id="view">
+    <canvas id="gl"></canvas>
+
+    <div id="secPanel" class="card" hidden>
+      <div class="cardTitle">Plano de corte</div>
+      <div class="row">
+        <div class="seg" id="segAxis"><button data-v="x">X</button><button data-v="y">Y</button><button data-v="z" class="on">Z</button></div>
+        <label class="chk"><input type="checkbox" id="secFlip"> Inverter</label>
+      </div>
+      <input type="range" id="secPos" min="0" max="1000" value="500">
+      <div class="mono" id="secVal"></div>
+    </div>
+
+    <div id="info" class="card" hidden>
+      <div class="cardTitle" id="infoName"></div>
+      <div class="muted" id="infoPath"></div>
+      <dl id="infoData"></dl>
+      <div class="row">
+        <button id="btnZoomSel">Enquadrar</button>
+        <button id="btnIsolate" title="Mostrar somente este item (I)">Isolar</button>
+        <button id="btnHide" title="Ocultar este item (H)">Ocultar</button>
+      </div>
+    </div>
+
+    <div id="measureLabel" class="tag" hidden></div>
+    <div id="hint"></div>
+
+    <div id="empty" hidden>
+      <div class="emptyBox">
+        <div class="emptyTitle">Abra um PDF 3D</div>
+        <p>Arraste o arquivo para esta janela ou use o bot&atilde;o abaixo. O arquivo &eacute; lido localmente, nada &eacute; enviado para a internet.</p>
+        <button id="btnOpen2" class="primary">Escolher arquivo&hellip;</button>
+      </div>
+    </div>
+    <div id="error" class="card" hidden><div class="cardTitle">N&atilde;o foi poss&iacute;vel abrir o modelo</div><div id="errorMsg"></div><div class="row"><button id="btnErrClose">Fechar</button></div></div>
+    <div id="drop" hidden><div>Solte o PDF 3D aqui</div></div>
+  </main>
+</div>
+<input type="file" id="file" accept=".pdf,.prc,application/pdf" hidden>
+<!--__EMBEDDED__-->
+<script>
+/*__APP__*/
+</script>
+</body>
+</html>
