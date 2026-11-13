@@ -1,8 +1,9 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef1f6">
 <title>ID3D – Visualizador de PDF 3D</title>
 <style>
 /*__CSS__*/
@@ -10,87 +11,166 @@
 </head>
 <body>
 <div id="app">
-  <header id="bar">
-    <button id="btnSide" class="icon" title="Mostrar/ocultar estrutura" aria-label="Mostrar/ocultar estrutura">&#9776;</button>
+  <main id="view">
+    <canvas id="gl" tabindex="0" aria-label="Modelo 3D"></canvas>
+    <div id="measureLabel" class="tag" hidden></div>
+    <div id="hint"></div>
+  </main>
+
+  <header id="appbar" class="card bar">
+    <button id="btnDrawer" class="tool" aria-pressed="false" title="Estrutura do modelo e anexos"><i data-icon="tree"></i><span>Estrutura</span></button>
     <div class="brand">
       <div id="docTitle">ID3D</div>
       <div id="docSub">Visualizador de PDF 3D</div>
     </div>
-    <div class="tools">
-      <button id="btnOpen" title="Abrir outro PDF 3D (ou arraste o arquivo para a janela)">Abrir PDF&hellip;</button>
-      <span class="sep"></span>
-      <label class="field"><span>Vista</span><select id="selView"></select></label>
-      <button id="btnFit" title="Enquadrar o modelo ou a sele&ccedil;&atilde;o (F)">Enquadrar</button>
-      <div class="seg" id="segProj" role="group" aria-label="Proje&ccedil;&atilde;o">
-        <button data-v="persp" class="on">Perspectiva</button><button data-v="ortho">Ortogr&aacute;fica</button>
-      </div>
-      <span class="sep"></span>
-      <label class="field"><span>Exibi&ccedil;&atilde;o</span>
-        <select id="selMode">
-          <option value="solid">S&oacute;lido</option>
-          <option value="edges">S&oacute;lido + arestas</option>
-          <option value="xray">Transparente</option>
-          <option value="wire">Aramado</option>
-        </select>
-      </label>
-      <button id="btnSection" class="toggle" title="Plano de corte">Corte</button>
-      <button id="btnMeasure" class="toggle" title="Medir dist&acirc;ncia entre dois pontos (M)">Medir</button>
-      <span class="sep"></span>
-      <button id="btnTheme" class="icon" title="Alternar tema claro/escuro" aria-label="Alternar tema">&#9680;</button>
-    </div>
   </header>
 
-  <aside id="side">
-    <div class="sideHead">
-      <input id="search" type="search" placeholder="Buscar componente&hellip;" autocomplete="off" spellcheck="false">
+  <nav id="toolbar" class="card bar" aria-label="Ferramentas">
+    <button id="btnViews" class="tool" aria-haspopup="true" aria-expanded="false"><i data-icon="cube"></i><span>Vistas</span></button>
+    <button id="btnDisplay" class="tool" aria-haspopup="true" aria-expanded="false"><i data-icon="layers"></i><span>Exibição</span></button>
+    <button id="btnSection" class="tool" aria-pressed="false"><i data-icon="section"></i><span>Corte</span></button>
+    <button id="btnMeasure" class="tool" aria-pressed="false"><i data-icon="ruler"></i><span>Medir</span></button>
+    <button id="btnFit" class="tool"><i data-icon="fit"></i><span>Enquadrar</span></button>
+    <button id="btnMore" class="tool" aria-haspopup="true" aria-expanded="false"><i data-icon="more"></i><span>Mais</span></button>
+  </nav>
+
+  <div id="popViews" class="card pop" hidden>
+    <div class="popTitle">Vistas</div>
+    <div id="viewList" class="grid2"></div>
+  </div>
+  <div id="popDisplay" class="card pop" hidden>
+    <div class="popTitle">Exibição</div>
+    <div id="modeList" class="grid2">
+      <button class="opt" data-mode="solid">Sólido</button>
+      <button class="opt" data-mode="edges">Sólido + arestas</button>
+      <button class="opt" data-mode="xray">Transparente</button>
+      <button class="opt" data-mode="wire">Aramado</button>
     </div>
-    <div id="tree" class="scroll"></div>
-    <div id="results" class="scroll" hidden></div>
-    <div class="sideFoot">
-      <button id="btnShowAll">Mostrar tudo</button>
-      <span id="stats"></span>
+  </div>
+  <div id="popMore" class="card pop" hidden>
+    <button class="item" id="btnOpen"><i data-icon="open"></i><span>Abrir modelo…</span></button>
+    <button class="item" id="btnShowAll"><i data-icon="eye"></i><span>Mostrar tudo</span></button>
+    <button class="item" id="btnPad" role="switch" aria-checked="true"><i data-icon="pad"></i><span>Controles na tela</span><b class="sw"></b></button>
+    <button class="item" id="btnTheme" role="switch" aria-checked="false"><i data-icon="moon"></i><span>Tema escuro</span><b class="sw"></b></button>
+    <button class="item" id="btnFull"><i data-icon="full"></i><span>Tela cheia</span></button>
+  </div>
+
+  <aside id="drawer" class="card" hidden aria-label="Estrutura do modelo e anexos">
+    <div class="tabs" role="tablist">
+      <button data-tab="tree" class="on" role="tab">Estrutura</button>
+      <button data-tab="files" role="tab">Anexos <b id="filesCount" class="count" hidden></b></button>
+    </div>
+    <div id="tabTree" class="tabBody">
+      <label class="searchBox"><i data-icon="search"></i><input id="search" type="search" placeholder="Buscar componente…" autocomplete="off" spellcheck="false" enterkeyhint="search"></label>
+      <div id="tree" class="scroll"></div>
+      <div id="results" class="scroll" hidden></div>
+    </div>
+    <div id="tabFiles" class="tabBody" hidden>
+      <div class="seg" id="filesFilter"><button data-v="todos" class="on">Todos</button><button data-v="pendente">Pendentes</button></div>
+      <div id="filesList" class="scroll"></div>
+    </div>
+    <div id="stats" class="drawerFoot"></div>
+  </aside>
+
+  <aside id="panel" class="card" hidden aria-label="Peça selecionada">
+    <div class="panelHead">
+      <div class="panelTitle">
+        <div id="infoName" class="h2"></div>
+        <div id="infoPath" class="muted"></div>
+      </div>
+      <button id="btnClosePanel" class="iconBtn" title="Fechar" aria-label="Fechar"><i data-icon="close"></i></button>
+    </div>
+    <div class="panelBody scroll">
+      <div class="actions">
+        <button id="btnZoomSel" class="chip"><i data-icon="fit"></i><span>Enquadrar</span></button>
+        <button id="btnIsolate" class="chip"><i data-icon="isolate"></i><span>Isolar</span></button>
+        <button id="btnHide" class="chip"><i data-icon="eyeOff"></i><span>Ocultar</span></button>
+      </div>
+      <dl id="infoData"></dl>
+      <section id="att">
+        <div class="attHead">
+          <div class="h3">Anexos <span id="attSummary" class="muted"></span></div>
+          <button id="btnAttach" class="primary"><i data-icon="plus"></i><span>Anexar</span></button>
+        </div>
+        <div id="attNote" class="note" hidden></div>
+        <div id="attList"></div>
+      </section>
     </div>
   </aside>
 
-  <main id="view">
-    <canvas id="gl"></canvas>
-
-    <div id="secPanel" class="card" hidden>
-      <div class="cardTitle">Plano de corte</div>
-      <div class="row">
-        <div class="seg" id="segAxis"><button data-v="x">X</button><button data-v="y">Y</button><button data-v="z" class="on">Z</button></div>
-        <label class="chk"><input type="checkbox" id="secFlip"> Inverter</label>
-      </div>
-      <input type="range" id="secPos" min="0" max="1000" value="500">
-      <div class="mono" id="secVal"></div>
+  <div id="navpad" class="card" aria-label="Controles de navegação">
+    <div class="seg" id="padMode">
+      <button data-v="rotate" class="on" aria-pressed="true"><i data-icon="rotate"></i><span>Girar</span></button>
+      <button data-v="pan" aria-pressed="false"><i data-icon="move"></i><span>Mover</span></button>
     </div>
+    <div class="padGrid">
+      <button data-nav="up" style="grid-area:u" aria-label="Para cima"><i data-icon="up"></i></button>
+      <button data-nav="left" style="grid-area:l" aria-label="Para a esquerda"><i data-icon="left"></i></button>
+      <button id="padHome" style="grid-area:c" aria-label="Enquadrar" title="Enquadrar"><i data-icon="fit"></i></button>
+      <button data-nav="right" style="grid-area:r" aria-label="Para a direita"><i data-icon="right"></i></button>
+      <button data-nav="down" style="grid-area:d" aria-label="Para baixo"><i data-icon="down"></i></button>
+      <button data-nav="in" class="zoom" style="grid-area:p" aria-label="Aproximar"><i data-icon="plus"></i></button>
+      <button data-nav="out" class="zoom" style="grid-area:m" aria-label="Afastar"><i data-icon="minus"></i></button>
+    </div>
+  </div>
 
-    <div id="info" class="card" hidden>
-      <div class="cardTitle" id="infoName"></div>
-      <div class="muted" id="infoPath"></div>
-      <dl id="infoData"></dl>
-      <div class="row">
-        <button id="btnZoomSel">Enquadrar</button>
-        <button id="btnIsolate" title="Mostrar somente este item (I)">Isolar</button>
-        <button id="btnHide" title="Ocultar este item (H)">Ocultar</button>
+  <div id="secPanel" class="card" hidden>
+    <div class="secHead">
+      <div class="h3">Plano de corte</div>
+      <div class="seg" id="segAxis"><button data-v="x">X</button><button data-v="y">Y</button><button data-v="z" class="on">Z</button></div>
+      <button id="secFlip" class="chip" aria-pressed="false"><i data-icon="rotate"></i><span>Inverter</span></button>
+    </div>
+    <input type="range" id="secPos" min="0" max="1000" value="500" aria-label="Posição do corte">
+    <div class="mono" id="secVal"></div>
+  </div>
+
+  <div id="empty" hidden>
+    <div class="emptyBox card">
+      <button id="btnCloseEmpty" class="iconBtn" title="Fechar" aria-label="Fechar" hidden><i data-icon="close"></i></button>
+      <div class="emptyTitle">ID3D</div>
+      <p>Abra um PDF 3D deste aparelho. O arquivo é lido aqui mesmo, sem ser enviado para a internet.</p>
+      <button id="btnPick" class="primary big"><i data-icon="open"></i><span>Escolher arquivo…</span></button>
+      <div id="modelBox" hidden>
+        <div class="h3">Modelos no servidor</div>
+        <div id="modelList"></div>
       </div>
     </div>
+  </div>
 
-    <div id="measureLabel" class="tag" hidden></div>
-    <div id="hint"></div>
-
-    <div id="empty" hidden>
-      <div class="emptyBox">
-        <div class="emptyTitle">Abra um PDF 3D</div>
-        <p>Arraste o arquivo para esta janela ou use o bot&atilde;o abaixo. O arquivo &eacute; lido localmente, nada &eacute; enviado para a internet.</p>
-        <button id="btnOpen2" class="primary">Escolher arquivo&hellip;</button>
+  <div id="review" hidden role="dialog" aria-label="Revisão de anexo">
+    <div class="revBar card">
+      <button id="revClose" class="chip"><i data-icon="left"></i><span>Voltar</span></button>
+      <div class="revTitle">
+        <div id="revName" class="h2"></div>
+        <div id="revMeta" class="muted"></div>
+      </div>
+      <span id="revStatus" class="status"></span>
+      <div class="revNav">
+        <button id="revPrev" class="iconBtn" aria-label="Anexo anterior"><i data-icon="left"></i></button>
+        <span id="revCount" class="mono"></span>
+        <button id="revNext" class="iconBtn" aria-label="Próximo anexo"><i data-icon="right"></i></button>
       </div>
     </div>
-    <div id="error" class="card" hidden><div class="cardTitle">N&atilde;o foi poss&iacute;vel abrir o modelo</div><div id="errorMsg"></div><div class="row"><button id="btnErrClose">Fechar</button></div></div>
-    <div id="drop" hidden><div>Solte o PDF 3D aqui</div></div>
-  </main>
+    <div id="revBody"></div>
+    <div class="revFoot card">
+      <input id="revNote" type="text" placeholder="Observação (opcional)" maxlength="2000" autocomplete="off" enterkeyhint="done">
+      <a id="revOpen" class="chip" target="_blank" rel="noopener"><i data-icon="external"></i><span>Abrir em nova aba</span></a>
+      <a id="revDownload" class="chip" download><i data-icon="download"></i><span>Baixar</span></a>
+      <button id="revDelete" class="chip danger"></button>
+      <button id="revVerify" class="primary big"></button>
+    </div>
+  </div>
+
+  <div id="error" class="card" hidden role="alertdialog">
+    <div class="h2">Não foi possível abrir o modelo</div>
+    <div id="errorMsg"></div>
+    <button id="btnErrClose" class="primary">Fechar</button>
+  </div>
+  <div id="toast" class="card" hidden role="status"></div>
+  <div id="drop" hidden><div>Solte o arquivo aqui</div></div>
 </div>
 <input type="file" id="file" accept=".pdf,.prc,application/pdf" hidden>
+<input type="file" id="attFile" multiple hidden>
 <!--__EMBEDDED__-->
 <script>
 /*__APP__*/
