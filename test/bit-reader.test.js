@@ -69,5 +69,5 @@ test('doubles: ida e volta com valores pseudoaleatorios', () => {
 test('leitura alem do fim falha em vez de devolver lixo', () => {
   const r = new BitReader(new Uint8Array([0xff]));
   r.byte();
-  assert.throws(() => r.bit(), /fim do bitstream/);
+  assert.throws(() => r.bit(), /fim inesperado dos dados do PRC/);
 });
