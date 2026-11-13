@@ -11,3 +11,9 @@ Thumbs.db
 *.prc
 *.u3d
 !examples/exemplo.pdf
+
+# Dados locais do servidor: anexos das pecas e modelos oferecidos na tela inicial.
+anexos/*
+!anexos/LEIAME.md
+modelos/*
+!modelos/LEIAME.md
