@@ -18,6 +18,8 @@ peça do modelo pode receber anexos (fotos, laudos, documentos) para revisão e 
 - **Anexos por peça**: anexar um ou mais arquivos, revisar (imagem, PDF, texto, vídeo e áudio
   abrem na própria tela), anotar uma observação e marcar como verificado. Uma lista geral
   mostra o que está pendente no modelo inteiro.
+- **Foto na hora**: com a peça selecionada, **Tirar foto** usa a câmera do aparelho e já
+  anexa a foto àquela peça.
 - **Exibição**: sólido, sólido com arestas, transparente e aramado; tema claro (padrão) e escuro.
 - **Corte e medição**: plano de corte em X, Y ou Z e distância entre dois pontos.
 
@@ -98,6 +100,23 @@ anexos/<modelo>/<id>-<nome>    os arquivos
 `anexos/` e `modelos/` **não vão para o git**: este repositório é público e esses arquivos
 costumam ser documentos internos. A cópia de segurança deles deve ser feita por outro meio.
 
+### Foto pela câmera
+
+O botão **Tirar foto**, no painel da peça, funciona de um de dois jeitos, conforme o que o
+navegador libera:
+
+| Como o ID3D foi aberto | O que acontece |
+| --- | --- |
+| Endereço seguro: `https://…`, ou `http://localhost` na própria máquina do servidor | A câmera abre dentro do ID3D: fotografar, conferir, **Usar foto** ou **Tirar outra**. Se o envio falhar, a foto continua na tela para tentar de novo. |
+| `http://…` pela rede, em tablet ou celular (Android, iPadOS, iOS) | Abre o aplicativo de câmera do aparelho; ao confirmar a foto, ela é anexada. |
+| `http://…` pela rede, em computador ou tablet com Windows | A câmera não fica disponível: os navegadores só a liberam em endereço seguro. Use **Anexar arquivo** com uma foto já tirada. |
+
+- A foto é gravada como `Foto AAAA-MM-DD HH.MM.SS.jpg` e entra como **pendente**, igual a
+  qualquer outro anexo.
+- Na primeira vez o navegador pede permissão para usar a câmera. A imagem vai apenas para o
+  servidor do ID3D; nada é enviado para a internet.
+- A câmera é desligada ao fechar a tela de foto e quando o ID3D vai para segundo plano.
+
 ## Formatos suportados
 
 | | Situação |
@@ -157,6 +176,7 @@ src/
     main.js               cena three.js, câmera, árvore, seleção, corte, medição
     navpad.js             quadro de controles de navegação
     attachments.js        anexos: painel da peça, lista geral e tela de revisão
+    camera.js             foto pela câmera do aparelho
     api.js                cliente do servidor (modelos e anexos)
     icons.js              ícones
     index.html, styles.css

@@ -813,7 +813,7 @@ import * as api from './api.js';
   window.addEventListener('drop', function (e) {
     e.preventDefault(); dragN = 0; $('#drop').hidden = true;
     var files = e.dataTransfer && e.dataTransfer.files;
-    if (!files || !files.length || att.revisando) return;
+    if (!files || !files.length || att.revisando || att.fotografando) return;
     // solto sobre o painel da peca: vira anexo; em qualquer outro lugar: abre como modelo
     if (e.target.closest && e.target.closest('#panel') && S.selected && att.disponivel) att.enviar(files);
     else loadFile(files[0]);
@@ -895,6 +895,7 @@ import * as api from './api.js';
 
   window.addEventListener('keydown', function (e) {
     var k = e.key.toLowerCase();
+    if (att.fotografando) { if (k === 'escape') att.fecharCamera(); return; }
     if (att.revisando) {
       if (k === 'escape') att.fecharRevisao();
       else if (!/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) { if (k === 'arrowleft') att.passo(-1); else if (k === 'arrowright') att.passo(1); }
