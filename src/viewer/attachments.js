@@ -3,6 +3,7 @@
 
 import * as api from './api.js';
 import { icon } from './icons.js';
+import { createCamera, modoDeCamera, nomeDaFoto } from './camera.js';
 
 function el(tag, cls, text) {
   var e = document.createElement(tag);
@@ -68,7 +69,7 @@ export function createAttachments(opts) {
   function desenharPainel() {
     var lista = $('attList'), nota = $('attNote'), resumo = $('attSummary'), botao = $('btnAttach');
     lista.textContent = '';
-    botao.disabled = !A.disponivel || !A.parte || A.enviando;
+    botao.disabled = $('btnPhoto').disabled = !A.disponivel || !A.parte || A.enviando;
     if (!A.disponivel) {
       nota.hidden = false;
       nota.textContent = 'Para anexar arquivos, abra o ID3D pelo servidor (npm start). Neste modo o visualizador funciona sem anexos.';
@@ -100,7 +101,7 @@ export function createAttachments(opts) {
     if (!A.disponivel) { lista.appendChild(el('div', 'vazio', 'Anexos indisponíveis: abra o ID3D pelo servidor (npm start).')); return; }
     var itens = filtrada();
     if (!itens.length) {
-      lista.appendChild(el('div', 'vazio', A.lista.length ? 'Nenhum anexo pendente de verificação.' : 'Nenhum arquivo anexado neste modelo. Selecione uma peça e toque em Anexar.'));
+      lista.appendChild(el('div', 'vazio', A.lista.length ? 'Nenhum anexo pendente de verificação.' : 'Nenhum arquivo anexado neste modelo. Selecione uma peça e toque em Tirar foto ou Anexar arquivo.'));
       return;
     }
     itens.forEach(function (a) {
@@ -116,8 +117,9 @@ export function createAttachments(opts) {
   });
 
   // ---------------------------------------------------------------- envio
+  // Devolve quantos arquivos foram anexados.
   async function enviar(files) {
-    if (!A.disponivel || !A.parte || !files.length || A.enviando) return;
+    if (!A.disponivel || !A.parte || !files.length || A.enviando) return 0;
     var parte = A.parte, lista = Array.prototype.slice.call(files), falhas = [];
     A.enviando = true; desenharPainel();
     for (var i = 0; i < lista.length; i++) {
@@ -132,9 +134,29 @@ export function createAttachments(opts) {
     if (falhas.length) opts.toast('Não foi possível anexar: ' + falhas.join('; '), false, 7000);
     else opts.toast(enviados === 1 ? 'Arquivo anexado.' : enviados + ' arquivos anexados.');
     mudou();
+    return enviados;
   }
   $('btnAttach').addEventListener('click', function () { $('attFile').click(); });
   $('attFile').addEventListener('change', function () { var fs = this.files; enviar(fs).finally(() => { this.value = ''; }); });
+
+  // ---------------------------------------------------------------- foto pela camera
+  var modoCamera = modoDeCamera(navigator, document);
+  var camera = createCamera({
+    toast: opts.toast,
+    aoUsar: async function (foto) { return (await enviar([foto])) === 1; },
+  });
+  $('btnPhoto').addEventListener('click', function () {
+    if (!A.parte) return;
+    if (modoCamera === 'interna') camera.abrir(A.parte.caminho);
+    else if (modoCamera === 'nativa') $('camFile').click();       // abre o aplicativo de camera do aparelho
+    else opts.toast('Neste endereço o navegador não libera a câmera (ele exige https). Use “Anexar arquivo” para enviar uma foto já tirada.', false, 9000);
+  });
+  $('camFile').addEventListener('change', function () {
+    var fotos = Array.prototype.map.call(this.files, function (f) {
+      return new File([f], nomeDaFoto(new Date(f.lastModified || Date.now()), f.type, f.name), { type: f.type, lastModified: f.lastModified });
+    });
+    enviar(fotos).finally(() => { this.value = ''; });
+  });
 
   // ---------------------------------------------------------------- revisao
   function abrirRevisao(id, ids) {
@@ -266,6 +288,8 @@ export function createAttachments(opts) {
   return {
     get disponivel() { return A.disponivel; },
     get revisando() { return !!A.rev; },
+    get fotografando() { return camera.aberta; },
+    fecharCamera: camera.fechar,
     fecharRevisao: fecharRevisao,
     passo: passo,
     enviar: enviar,
@@ -278,7 +302,7 @@ export function createAttachments(opts) {
     },
     async definirModelo(modelo) {
       A.modelo = modelo; A.lista = []; A.parte = null;
-      fecharRevisao();
+      fecharRevisao(); camera.fechar();
       if (A.disponivel && modelo) {
         try { A.lista = await api.listarAnexos(modelo); }
         catch (e) { opts.toast(e.message, false, 6000); }

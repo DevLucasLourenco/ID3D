@@ -88,9 +88,10 @@
       </div>
       <dl id="infoData"></dl>
       <section id="att">
-        <div class="attHead">
-          <div class="h3">Anexos <span id="attSummary" class="muted"></span></div>
-          <button id="btnAttach" class="primary"><i data-icon="plus"></i><span>Anexar</span></button>
+        <div class="h3">Anexos <span id="attSummary" class="muted"></span></div>
+        <div class="attActions">
+          <button id="btnPhoto" class="chip"><i data-icon="camera"></i><span>Tirar foto</span></button>
+          <button id="btnAttach" class="primary"><i data-icon="plus"></i><span>Anexar arquivo</span></button>
         </div>
         <div id="attNote" class="note" hidden></div>
         <div id="attList"></div>
@@ -161,6 +162,27 @@
     </div>
   </div>
 
+  <div id="camera" hidden role="dialog" aria-label="Câmera">
+    <div class="revBar card">
+      <button id="camClose" class="chip"><i data-icon="left"></i><span>Voltar</span></button>
+      <div class="revTitle">
+        <div class="h2">Foto para anexar</div>
+        <div id="camPart" class="muted"></div>
+      </div>
+      <button id="camSwitch" class="chip" hidden><i data-icon="rotate"></i><span>Trocar câmera</span></button>
+    </div>
+    <div id="camBody">
+      <video id="camVideo" playsinline muted autoplay hidden></video>
+      <img id="camShot" alt="Foto tirada" hidden>
+      <div id="camMsg" role="status" hidden></div>
+    </div>
+    <div class="camFoot card">
+      <button id="camShoot" class="shutter" aria-label="Tirar foto" title="Tirar foto"></button>
+      <button id="camRetry" class="chip" hidden><i data-icon="rotate"></i><span>Tirar outra</span></button>
+      <button id="camUse" class="primary big" hidden><i data-icon="check"></i><span>Usar foto</span></button>
+    </div>
+  </div>
+
   <div id="error" class="card" hidden role="alertdialog">
     <div class="h2">Não foi possível abrir o modelo</div>
     <div id="errorMsg"></div>
@@ -171,6 +193,7 @@
 </div>
 <input type="file" id="file" accept=".pdf,.prc,application/pdf" hidden>
 <input type="file" id="attFile" multiple hidden>
+<input type="file" id="camFile" accept="image/*" capture="environment" hidden>
 <!--__EMBEDDED__-->
 <script>
 /*__APP__*/

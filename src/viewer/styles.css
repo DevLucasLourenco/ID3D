@@ -160,7 +160,8 @@ i[data-icon] { display: inline-flex; }
 #infoData dt { color: var(--muted); }
 #infoData dd { margin: 0; overflow-wrap: anywhere; }
 #att { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
-.attHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.attActions { display: grid; grid-template-columns: repeat(auto-fit, minmax(136px, 1fr)); gap: 6px; margin: 10px 0; }
+.attActions button { padding: 0 8px; }
 .note { padding: 10px 12px; border-radius: 10px; background: var(--soft); color: var(--muted); font-size: 13px; }
 .att { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 60px; padding: 6px 8px; margin-bottom: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--solid); text-align: left; }
 .att:hover { background: var(--hover); }
@@ -213,8 +214,8 @@ i[data-icon] { display: inline-flex; }
 .model .attMain { flex: 1; }
 
 /* ---------------------------------------------------------------- revisao de anexo */
-#review { position: absolute; inset: 0; z-index: 60; background: var(--scrim); display: grid; grid-template-rows: auto 1fr auto; gap: 10px; padding: var(--gap); }
-#review .card { position: static; }
+#review, #camera { position: absolute; inset: 0; z-index: 60; background: var(--scrim); display: grid; grid-template-rows: auto 1fr auto; gap: 10px; padding: var(--gap); }
+#review .card, #camera .card { position: static; }
 .revBar { display: flex; align-items: center; gap: 12px; padding: 8px 10px; }
 .revTitle { flex: 1; min-width: 0; }
 .revTitle .h2, .revTitle .muted { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -231,6 +232,16 @@ i[data-icon] { display: inline-flex; }
 .revFoot { display: flex; align-items: center; gap: 8px; padding: 10px; flex-wrap: wrap; }
 #revNote { flex: 1 1 220px; min-width: 0; min-height: var(--hit); padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--solid); -webkit-user-select: text; user-select: text; }
 #revNote:focus { outline: 0; border-color: var(--accent); }
+
+/* ---------------------------------------------------------------- camera */
+#camera { z-index: 65; }
+#camBody { position: relative; min-height: 0; border-radius: var(--radius); background: #0b0d11; color: #d5dbe5; overflow: hidden; display: grid; place-items: center; }
+#camVideo, #camShot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+#camMsg { max-width: 440px; padding: 24px; text-align: center; font-size: 15px; }
+.camFoot { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 96px; padding: 10px; flex-wrap: wrap; }
+.shutter { position: relative; width: 72px; height: 72px; padding: 0; border: 4px solid var(--accent); border-radius: 50%; background: var(--solid); }
+.shutter::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--accent); transition: inset .08s; }
+.shutter:active::after { inset: 10px; }
 
 /* ---------------------------------------------------------------- telas estreitas */
 @media (max-width: 900px) {
