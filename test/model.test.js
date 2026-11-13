@@ -105,5 +105,22 @@ test('PRC corrompido falha com erro em vez de travar', () => {
   const broken = prcBytes.slice();
   for (let i = 400; i < 460; i++) broken[i] ^= 0x5a;
   assert.throws(() => parsePRC(broken));
-  assert.throws(() => parsePRC(prcBytes.subarray(0, 300)));
+  assert.throws(() => parsePRC(prcBytes.subarray(0, 300)), /cabeçalho inválido|truncado|fim inesperado/);
+});
+
+test('load: erros chegam ao usuario em portugues, nunca a mensagem crua do motor JavaScript', () => {
+  const enc = (s) => new TextEncoder().encode(s);
+  const inputs = [enc('PRC' + 'x'.repeat(400)), prcBytes.subarray(0, 300), prcBytes.subarray(0, prcBytes.length - 40)];
+  for (let seed = 1; seed <= 40; seed++) {
+    const broken = prcBytes.slice();
+    let x = seed * 2654435761;
+    for (let k = 0; k < 12; k++) { x = (x * 1103515245 + 12345) >>> 0; broken[x % broken.length] ^= 1 << (x % 8); }
+    inputs.push(broken);
+  }
+  for (const bytes of inputs) {
+    try { load(bytes); } catch (e) {
+      assert.equal(e.constructor, Error, 'erro do proprio leitor');
+      assert.doesNotMatch(e.message, /Invalid|undefined|not a|Cannot|out of|is not/, e.message);
+    }
+  }
 });

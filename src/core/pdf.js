@@ -57,7 +57,7 @@ export function extractFromPDF(u8) {
     }
     var raw = u8.subarray(p, p + len);
     if (/\/Filter\s*(\[\s*)?\/(FlateDecode|Fl)\b/.test(b.dict)) return inflate(raw, 0, raw.length);
-    if (/\/Filter/.test(b.dict)) throw new Error('Filtro de stream PDF não suportado: ' + /\/Filter\s*[^/]*\/(\w+)/.exec(b.dict)[1]);
+    if (/\/Filter/.test(b.dict)) throw new Error('Compressão do PDF não suportada: ' + /\/Filter\s*[^/]*\/(\w+)/.exec(b.dict)[1]);
     return raw;
   }
   if (/\/Encrypt\s+\d+\s+\d+\s+R/.test(text)) throw new Error('PDF criptografado ou protegido por senha: não é possível extrair o modelo.');
@@ -68,7 +68,7 @@ export function extractFromPDF(u8) {
     var sm = /\/Subtype\s*\/(PRC|U3D)\b/.exec(b.dict);
     if (sm && /\/Type\s*\/3D\b/.test(b.dict)) found = { num: order[i], format: sm[1], dict: b.dict };
   }
-  if (!found) throw new Error('Nenhum modelo 3D (anotação /3D com stream PRC ou U3D) foi encontrado neste PDF.');
+  if (!found) throw new Error('Nenhum modelo 3D (PRC ou U3D) foi encontrado neste PDF.');
   // vistas salvas
   var views = [], seen = {};
   var va = /\/VA\s*\[([^\]]*)\]/.exec(found.dict);
