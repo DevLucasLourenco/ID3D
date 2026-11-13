@@ -21,7 +21,7 @@ var FIXL = null, FIXD = null;
 export function inflate(src, pos, end) {
   pos = pos || 0;
   if (end === undefined) end = src.length;
-  if ((src[pos] & 0x0f) !== 8 || ((src[pos] << 8) | src[pos + 1]) % 31 !== 0) throw new Error('stream zlib inválido');
+  if ((src[pos] & 0x0f) !== 8 || ((src[pos] << 8) | src[pos + 1]) % 31 !== 0) throw new Error('dados zlib inválidos');
   pos += 2;
   var out = new Uint8Array(Math.max(1024, (end - pos) * 3)), op = 0, bb = 0, bc = 0;
   function grow(n) {
@@ -29,7 +29,7 @@ export function inflate(src, pos, end) {
     var t = new Uint8Array(Math.max(out.length * 2, op + n)); t.set(out.subarray(0, op)); out = t;
   }
   function bits(n) {
-    while (bc < n) { if (pos >= end) throw new Error('fim inesperado do stream comprimido'); bb |= src[pos++] << bc; bc += 8; }
+    while (bc < n) { if (pos >= end) throw new Error('fim inesperado dos dados comprimidos'); bb |= src[pos++] << bc; bc += 8; }
     var v = bb & ((1 << n) - 1); bb >>>= n; bc -= n; return v;
   }
   function sym(h) {

@@ -21,8 +21,17 @@ export function load(u8) {
   if (u8[0] === 0x50 && u8[1] === 0x52 && u8[2] === 0x43) ex = { format: 'PRC', data: u8, views: [], info: {} };
   else ex = extractFromPDF(u8);
   if (ex.format !== 'PRC') throw new Error('Este PDF usa o formato ' + ex.format + ', que este visualizador ainda não decodifica (apenas PRC).');
-  var prc = parsePRC(ex.data);
-  var scene = buildScene(prc);
+  var prc, scene;
+  try {
+    prc = parsePRC(ex.data);
+    scene = buildScene(prc);
+  } catch (e) {
+    // Erros do proprio leitor ja vem com mensagem em portugues. Qualquer outro (RangeError,
+    // TypeError...) e o motor JavaScript tropecando em dados invalidos: a mensagem dele
+    // viria em ingles e nao ajudaria quem esta usando o visualizador.
+    if (e && e.constructor === Error) throw e;
+    throw new Error('O modelo 3D deste arquivo parece estar corrompido ou incompleto.', { cause: e });
+  }
   scene.views = ex.views; scene.info = ex.info; scene.prcVersion = prc.version; scene.prcBytes = ex.data.length;
   scene.modelId = fingerprint(ex.data);
   return scene;

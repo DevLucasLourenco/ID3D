@@ -8,12 +8,12 @@ var utf8 = new TextDecoder('utf-8');
 export function BitReader(u8) { this.d = u8; this.p = 0; this.end = u8.length * 8; }
 BitReader.prototype = {
   bit: function () {
-    if (this.p >= this.end) throw new Error('fim do bitstream PRC');
+    if (this.p >= this.end) throw new Error('fim inesperado dos dados do PRC');
     var b = (this.d[this.p >> 3] >> (7 - (this.p & 7))) & 1; this.p++; return b;
   },
   bits: function (n) { var v = 0; for (var i = 0; i < n; i++) v = v * 2 + this.bit(); return v; },
   byte: function () {
-    if (this.p + 8 > this.end) throw new Error('fim do bitstream PRC');
+    if (this.p + 8 > this.end) throw new Error('fim inesperado dos dados do PRC');
     var i = this.p >> 3, o = this.p & 7; this.p += 8;
     return o === 0 ? this.d[i] : ((this.d[i] << o) | (this.d[i + 1] >> (8 - o))) & 0xff;
   },
@@ -31,7 +31,7 @@ BitReader.prototype = {
   string: function () {
     if (!this.bit()) return '';
     var n = this.uint();
-    if (n > (this.end - this.p) / 8) throw new Error('string PRC inválida');
+    if (n > (this.end - this.p) / 8) throw new Error('texto PRC inválido');
     var b = new Uint8Array(n);
     for (var i = 0; i < n; i++) b[i] = this.byte();
     return utf8.decode(b);
