@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
+    "start": "node scripts/build.mjs && node server/index.mjs",
     "dev": "node scripts/dev.mjs",
     "sample": "node scripts/make-sample.mjs",
     "test": "node --test \"test/*.test.js\"",
