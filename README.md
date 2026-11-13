@@ -127,6 +127,13 @@ examples/                 modelo sintético
 Os testes não dependem de arquivos reais: `scripts/lib/prc-writer.mjs` grava um PRC sintético
 com o mesmo algoritmo de compressão de doubles do formato, e o leitor é verificado contra ele.
 
+## Licença
+
+O código do ID3D é distribuído sob a [licença MIT](LICENSE).
+
+A exceção é `src/core/prc-double-table.js`, derivado do projeto Asymptote, que permanece sob
+a LGPL-3.0-or-later (veja abaixo).
+
 ## Créditos e licenças de terceiros
 
 - [three.js](https://threejs.org/) (MIT) — renderização.

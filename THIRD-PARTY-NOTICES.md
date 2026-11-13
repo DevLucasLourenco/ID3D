@@ -1,6 +1,7 @@
 # Avisos de terceiros
 
-O ID3D inclui ou depende dos componentes abaixo. Os textos completos das licenças estão em
+O código do ID3D é distribuído sob a licença MIT ([`LICENSE`](LICENSE)). Ele inclui ou depende
+dos componentes abaixo, que mantêm as próprias licenças. Os textos completos estão em
 [`LICENSES/`](LICENSES/).
 
 ## Tabela de doubles do PRC — Asymptote
